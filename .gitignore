@@ -74,3 +74,8 @@ apps/extension-wallet/vitest.config.js.map
 
 issues.md
 pr.md
+
+# Project-specific ignores
+@frontend-design/
+@brief.md
+.clinerules
