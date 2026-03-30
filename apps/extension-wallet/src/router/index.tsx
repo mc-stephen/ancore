@@ -157,8 +157,9 @@ export function RouterShell(): JSX.Element {
           </Suspense>
 
           <section className="rounded-3xl border border-dashed border-cyan-400/30 bg-cyan-400/5 p-4 text-sm leading-6 text-cyan-50/90">
-            Zustand stores wired with extension storage persistence. Auto-lock and session management
-            active. Feature-specific screens can replace these placeholders incrementally.
+            Zustand stores wired with extension storage persistence. Auto-lock and session
+            management active. Feature-specific screens can replace these placeholders
+            incrementally.
           </section>
         </main>
       </div>
