@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import type { RelayServiceContract } from '../types';
 import type { RelayExecuteRequest } from '../types';
-import { logger, redactRelayRequest } from '../logging';
+import { redactSessionKey } from '../logging';
 
 /**
  * Factory that returns the POST /relay/execute handler bound to a service instance.
@@ -13,26 +13,27 @@ export function createExecuteRelayHandler(relayService: RelayServiceContract) {
   return async (req: Request, res: Response): Promise<void> => {
     const request = req.body as RelayExecuteRequest;
 
-    logger.info(
-      { ...redactRelayRequest(request), handler: 'relay_execute' },
-      'relay_execute_received'
-    );
+    const log = req.log?.child({
+      route: 'POST /relay/execute',
+      sessionKey: redactSessionKey(request.sessionKey),
+      operation: request.operation,
+    }) ?? { info: () => {}, warn: () => {}, error: () => {}, debug: () => {}, child: () => ({} as any) };
+
+    const start = req.startTime ?? Date.now();
 
     const response = await relayService.executeRelay(request);
+    const durationMs = Date.now() - start;
 
     if (response.success) {
-      logger.info(
-        {
-          handler: 'relay_execute',
-          transactionId: response.transactionId,
-          gasUsed: response.gasUsed,
-        },
-        'relay_execute_success'
+      log.info(
+        { durationMs, outcome: 'success', transactionId: response.transactionId },
+        'relay_execute_complete'
       );
     } else {
-      logger.warn(
+      log.warn(
         {
-          handler: 'relay_execute',
+          durationMs,
+          outcome: 'error',
           errorCode: response.error?.code,
           errorMessage: response.error?.message,
         },

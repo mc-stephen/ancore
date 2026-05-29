@@ -1,2 +1,9 @@
-export * from './logger';
-export * from './redact';
+export {
+  rootLogger,
+  createRequestLogger,
+  redactAccountId,
+  redactSessionKey,
+  type Logger,
+  type LogFields,
+  type LogLevel,
+} from './logger';

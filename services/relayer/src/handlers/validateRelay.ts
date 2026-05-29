@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import type { RelayServiceContract } from '../types';
 import type { RelayValidateRequest } from '../types';
-import { logger, redactRelayRequest } from '../logging';
+import { redactSessionKey } from '../logging';
 
 /**
  * Factory that returns the POST /relay/validate handler bound to a service instance.
@@ -13,20 +13,24 @@ export function createValidateRelayHandler(relayService: RelayServiceContract) {
   return async (req: Request, res: Response): Promise<void> => {
     const request = req.body as RelayValidateRequest;
 
-    logger.info(
-      { ...redactRelayRequest(request), handler: 'relay_validate' },
-      'relay_validate_received'
-    );
+    const log = req.log?.child({
+      route: 'POST /relay/validate',
+      sessionKey: redactSessionKey(request.sessionKey),
+      operation: request.operation,
+    }) ?? { info: () => {}, warn: () => {}, error: () => {}, debug: () => {}, child: () => ({} as any) };
+
+    const start = req.startTime ?? Date.now();
 
     const result = await relayService.validateRelay(request);
+    const durationMs = Date.now() - start;
 
     if (result.valid) {
-      logger.info({ handler: 'relay_validate', valid: true }, 'relay_validate_success');
+      log.info({ durationMs, outcome: 'success' }, 'relay_validate_complete');
     } else {
-      logger.warn(
+      log.warn(
         {
-          handler: 'relay_validate',
-          valid: false,
+          durationMs,
+          outcome: 'validation_failed',
           errorCode: result.error?.code,
           errorMessage: result.error?.message,
         },
