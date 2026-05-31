@@ -6,6 +6,7 @@ import {
   revealVaultSecret,
   type VaultExportKind,
 } from '../../security/vault-export';
+import { useTransferPolicy } from '../../hooks/useTransferPolicy';
 import { ScreenHeader } from './NetworkSettings';
 import { useDeviceSessionsStore, type DeviceSession } from '../../stores/deviceSessions';
 
@@ -15,6 +16,7 @@ type SecurityView =
   | 'auto-lock'
   | 'export-key'
   | 'export-mnemonic'
+  | 'transfer-limits'
   | 'active-sessions';
 
 interface SecuritySettingsProps {
@@ -178,6 +180,116 @@ function AutoLockView({
 }
 
 // ── Export warning wrapper ───────────────────────────────────────────────────
+
+function TransferLimitsView({ onDone }: { onDone: () => void }) {
+  const { policy, updateSettings } = useTransferPolicy();
+  const [dailyLimit, setDailyLimit] = React.useState(policy.dailyLimit.toString());
+  const [stepUpThreshold, setStepUpThreshold] = React.useState(policy.stepUpThreshold.toString());
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState(false);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+
+    const daily = Number(dailyLimit);
+    const stepUp = Number(stepUpThreshold);
+
+    if (isNaN(daily) || daily <= 0) {
+      setError('Daily limit must be a positive number');
+      return;
+    }
+
+    if (isNaN(stepUp) || stepUp <= 0) {
+      setError('Step-up threshold must be a positive number');
+      return;
+    }
+
+    if (stepUp > daily) {
+      setError('Step-up threshold cannot exceed daily limit');
+      return;
+    }
+
+    updateSettings({ dailyLimit: daily, transferStepUpThreshold: stepUp });
+    setSuccess(true);
+
+    setTimeout(() => {
+      onDone();
+    }, 1500);
+  }
+
+  if (success) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+          <Check className="h-6 w-6 text-green-600" />
+        </div>
+        <p className="text-sm font-medium text-foreground">Transfer limits updated successfully</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-foreground block mb-2">
+            Daily Transfer Limit (XLM)
+          </label>
+          <Input
+            type="number"
+            value={dailyLimit}
+            onChange={(e) => setDailyLimit(e.target.value)}
+            min="1"
+            step="1"
+            className="w-full"
+            placeholder="e.g., 1000"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Maximum amount you can transfer in a 24-hour period
+          </p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-foreground block mb-2">
+            Step-up Verification Threshold (XLM)
+          </label>
+          <Input
+            type="number"
+            value={stepUpThreshold}
+            onChange={(e) => setStepUpThreshold(e.target.value)}
+            min="1"
+            step="1"
+            className="w-full"
+            placeholder="e.g., 250"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Amount above which additional verification is required
+          </p>
+        </div>
+
+        {error && <p className="text-xs text-destructive">{error}</p>}
+
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" className="flex-1" onClick={onDone}>
+            Cancel
+          </Button>
+          <Button type="submit" className="flex-1">
+            Save Changes
+          </Button>
+        </div>
+      </form>
+
+      <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3">
+        <p className="text-xs font-medium text-blue-900 dark:text-blue-200 mb-2">Current Settings</p>
+        <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
+          <li>• Daily limit: {policy.dailyLimit} XLM</li>
+          <li>• Step-up threshold: {policy.stepUpThreshold} XLM</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 function ExportWarningView({
   exportKind,
@@ -414,6 +526,7 @@ export function SecuritySettings({
     'auto-lock': 'Auto-lock Timeout',
     'export-key': 'Export Private Key',
     'export-mnemonic': 'Export Recovery Phrase',
+    'transfer-limits': 'Transfer Limits',
     'active-sessions': 'Active Sessions',
   };
 
@@ -442,6 +555,7 @@ export function SecuritySettings({
           onDone={() => setView('menu')}
         />
       )}
+      {view === 'transfer-limits' && <TransferLimitsView onDone={() => setView('menu')} />}
       {view === 'export-key' && (
         <ExportWarningView
           exportKind="privateKey"
@@ -478,6 +592,7 @@ function SecurityMenu({
   requirePasswordForSensitiveActions: boolean;
   onRequirePasswordForSensitiveActionsChange: (value: boolean) => void;
 }) {
+  const { policy } = useTransferPolicy();
   const timeoutLabel = TIMEOUT_OPTIONS.find((o) => o.value === autoLockTimeout)?.label ?? 'Custom';
 
   return (
@@ -498,6 +613,12 @@ function SecurityMenu({
           description="Lock after inactivity"
           value={timeoutLabel}
           onClick={() => onNavigate('auto-lock')}
+        />
+        <MenuItem
+          label="Transfer Limits"
+          description="Set daily limits and verification thresholds"
+          value={`${policy.dailyLimit} XLM`}
+          onClick={() => onNavigate('transfer-limits')}
         />
         <MenuItem
           label="Require password for exports"

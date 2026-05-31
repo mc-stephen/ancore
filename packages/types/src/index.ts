@@ -31,6 +31,7 @@ export * from './smart-account';
 export * from './session-key';
 export * from './user-operation';
 export * from './wallet';
+export * from './transfer-policy';
 export * from './guards';
 export * from './schemas';
 export * from './payment-request';
