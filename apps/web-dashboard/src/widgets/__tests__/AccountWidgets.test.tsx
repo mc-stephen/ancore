@@ -96,3 +96,57 @@ describe('Account Overview Widgets', () => {
     });
   });
 });
+
+// ─── Skeleton tests ───────────────────────────────────────────────────────────
+
+import {
+  AccountOverviewSkeleton,
+  TransactionListSkeleton,
+  BalanceChartSkeleton,
+  SessionKeysSkeleton,
+  MultiSigSkeleton,
+  InvoiceListSkeleton,
+  DashboardPageSkeleton,
+} from '../../components/skeletons/LoadingSkeletons';
+
+describe('Loading Skeletons', () => {
+  it('AccountOverviewSkeleton renders with default testid', () => {
+    render(<AccountOverviewSkeleton />);
+    expect(screen.getByTestId('overview-skeleton')).toBeInTheDocument();
+  });
+
+  it('AccountOverviewSkeleton accepts custom testid', () => {
+    render(<AccountOverviewSkeleton data-testid="custom-overview" />);
+    expect(screen.getByTestId('custom-overview')).toBeInTheDocument();
+  });
+
+  it('TransactionListSkeleton renders with default testid', () => {
+    render(<TransactionListSkeleton />);
+    expect(screen.getByTestId('transaction-list-skeleton')).toBeInTheDocument();
+  });
+
+  it('BalanceChartSkeleton renders with default testid', () => {
+    render(<BalanceChartSkeleton />);
+    expect(screen.getByTestId('balance-chart-skeleton')).toBeInTheDocument();
+  });
+
+  it('SessionKeysSkeleton renders with default testid', () => {
+    render(<SessionKeysSkeleton />);
+    expect(screen.getByTestId('session-keys-skeleton')).toBeInTheDocument();
+  });
+
+  it('MultiSigSkeleton renders with default testid', () => {
+    render(<MultiSigSkeleton />);
+    expect(screen.getByTestId('multi-sig-skeleton')).toBeInTheDocument();
+  });
+
+  it('InvoiceListSkeleton renders with default testid', () => {
+    render(<InvoiceListSkeleton />);
+    expect(screen.getByTestId('invoice-list-skeleton')).toBeInTheDocument();
+  });
+
+  it('DashboardPageSkeleton renders with dashboard-skeleton testid', () => {
+    render(<DashboardPageSkeleton />);
+    expect(screen.getByTestId('dashboard-skeleton')).toBeInTheDocument();
+  });
+});
