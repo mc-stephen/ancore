@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchAccountBalance, fetchAccountData } from '../lib/horizon';
 
 export type AccountStatus = 'active' | 'inactive' | 'locked';
 
@@ -12,10 +11,7 @@ export interface AccountOverview {
 export class AccountOverviewError extends Error {
   code: 'ACCOUNT_NOT_FOUND' | 'HORIZON_UNAVAILABLE' | 'FETCH_FAILED';
 
-  constructor(
-    message: string,
-    code: 'ACCOUNT_NOT_FOUND' | 'HORIZON_UNAVAILABLE' | 'FETCH_FAILED',
-  ) {
+  constructor(message: string, code: 'ACCOUNT_NOT_FOUND' | 'HORIZON_UNAVAILABLE' | 'FETCH_FAILED') {
     super(message);
     this.name = 'AccountOverviewError';
     this.code = code;
@@ -43,12 +39,6 @@ export interface UseAccountOverviewReturn {
   refetch: () => Promise<void>;
 }
 
-const MOCK_ACCOUNT_OVERVIEW: AccountOverview = {
-  balance: 1250.75,
-  nonce: 42,
-  status: 'active',
-};
-
 function classifyAccountOverviewError(status?: number): AccountOverviewError {
   if (status === 404) {
     return new AccountNotFoundError();
@@ -73,6 +63,7 @@ export function useAccountOverview(publicKey: string): UseAccountOverviewReturn 
   const fetchData = useCallback(async () => {
     if (!publicKey) {
       setData(null);
+      setError(null);
       setIsLoading(false);
       return;
     }
@@ -81,16 +72,23 @@ export function useAccountOverview(publicKey: string): UseAccountOverviewReturn 
     setError(null);
 
     try {
-      const accountData = await fetchAccountData(publicKey);
-      const balance = await fetchAccountBalance(publicKey);
+      const response = await fetch(
+        `/api/account-overview?publicKey=${encodeURIComponent(publicKey)}`
+      );
 
-      setData({
-        balance,
-        nonce: Number(accountData.sequence),
-        status: 'active',
-      });
+      if (!response.ok) {
+        throw classifyAccountOverviewError(response.status);
+      }
+
+      const accountOverview = (await response.json()) as AccountOverview;
+
+      setData(accountOverview);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch account data'));
+      setError(
+        err instanceof AccountOverviewError
+          ? err
+          : new AccountOverviewError('Failed to fetch account data', 'FETCH_FAILED')
+      );
       setData(null);
     } finally {
       setIsLoading(false);
