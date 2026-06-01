@@ -8,6 +8,7 @@ export const paymentIntentSchema = z.object({
   amount: z.string().regex(/^\d+(\.\d+)?$/, 'Invalid amount format'),
   asset: z.enum(['XLM', 'USDC']),
   destination: z.string().min(1, 'Destination is required'),
+  requiresConfirmation: z.boolean().default(false),
 });
 
 /**

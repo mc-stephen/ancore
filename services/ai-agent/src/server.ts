@@ -4,6 +4,19 @@ import { intentSchema } from './schemas/intent';
 const startTime = Date.now();
 
 /**
+ * Determines if a payment intent requires confirmation based on amount.
+ * High-value payments (e.g., >100 USDC or >1000 XLM) require confirmation.
+ */
+function requiresConfirmation(intent: any): boolean {
+  if (intent.type === 'payment') {
+    const amount = parseFloat(intent.amount);
+    const threshold = intent.asset === 'USDC' ? 100 : 1000;
+    return amount > threshold;
+  }
+  return false;
+}
+
+/**
  * App factory — exported for testing.
  *
  * Creates and configures the Express application for the AI Agent service.
@@ -37,7 +50,12 @@ export function createApp(): Express {
     if (!parsed.success) {
       return res.status(400).json({ errors: parsed.error.flatten() });
     }
-    return res.status(200).json({ valid: true, intent: parsed.data });
+    const confirmationRequired = requiresConfirmation(parsed.data);
+    return res.status(200).json({
+      valid: true,
+      intent: parsed.data,
+      requiresConfirmation: confirmationRequired,
+    });
   });
 
   return app;

@@ -57,6 +57,79 @@ describe('POST /agent/draft-intent', () => {
   });
 });
 
+// ── /v1/intents/validate ──────────────────────────────────────────────────────
+
+describe('POST /v1/intents/validate', () => {
+  it('returns 200 with valid payment intent below threshold', async () => {
+    const res = await request(app)
+      .post('/v1/intents/validate')
+      .send({
+        type: 'payment',
+        amount: '50',
+        asset: 'USDC',
+        destination: 'GABC123',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+    expect(res.body.requiresConfirmation).toBe(false);
+    expect(res.body.intent.type).toBe('payment');
+  });
+
+  it('returns 200 with valid payment intent above threshold (USDC)', async () => {
+    const res = await request(app)
+      .post('/v1/intents/validate')
+      .send({
+        type: 'payment',
+        amount: '150',
+        asset: 'USDC',
+        destination: 'GABC123',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+    expect(res.body.requiresConfirmation).toBe(true);
+    expect(res.body.intent.type).toBe('payment');
+  });
+
+  it('returns 200 with valid payment intent above threshold (XLM)', async () => {
+    const res = await request(app)
+      .post('/v1/intents/validate')
+      .send({
+        type: 'payment',
+        amount: '1500',
+        asset: 'XLM',
+        destination: 'GABC123',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+    expect(res.body.requiresConfirmation).toBe(true);
+    expect(res.body.intent.type).toBe('payment');
+  });
+
+  it('returns 400 for invalid payment intent', async () => {
+    const res = await request(app)
+      .post('/v1/intents/validate')
+      .send({
+        type: 'payment',
+        amount: 'invalid',
+        asset: 'USDC',
+        destination: 'GABC123',
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.errors).toBeDefined();
+  });
+
+  it('returns 400 for missing required fields', async () => {
+    const res = await request(app)
+      .post('/v1/intents/validate')
+      .send({
+        type: 'payment',
+        amount: '50',
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.errors).toBeDefined();
+  });
+});
+
 // ── guardrail ─────────────────────────────────────────────────────────────────
 
 describe('enforceNoAutonomousExecution', () => {
