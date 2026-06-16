@@ -1,4 +1,3 @@
-import { webcrypto } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { encryptSecretKey } from '@ancore/crypto';
 import { SecureStorageManager, createStorageAdapter, type StorageAdapter } from '@ancore/core-sdk';
@@ -25,13 +24,6 @@ vi.mock('@ancore/core-sdk', async () => {
     },
   };
 });
-
-if (!globalThis.crypto?.subtle) {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: webcrypto,
-    configurable: true,
-  });
-}
 
 if (!globalThis.btoa) {
   globalThis.btoa = (value: string) => Buffer.from(value, 'binary').toString('base64');
