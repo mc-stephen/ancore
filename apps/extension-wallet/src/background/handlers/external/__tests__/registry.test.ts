@@ -22,17 +22,17 @@ describe('external handler registry', () => {
     it('registers a handler', () => {
       const handler = async () => ({ result: 'test' });
       registerExternalHandler('requestAccess' as any, handler);
-      
+
       expect(hasExternalHandler('requestAccess' as any)).toBe(true);
     });
 
     it('replaces existing handler', () => {
       const handler1 = async () => ({ result: 'test1' });
       const handler2 = async () => ({ result: 'test2' });
-      
+
       registerExternalHandler('requestAccess' as any, handler1);
       registerExternalHandler('requestAccess' as any, handler2);
-      
+
       const registered = getExternalHandler('requestAccess' as any);
       expect(registered).toBe(handler2);
     });
@@ -43,7 +43,7 @@ describe('external handler registry', () => {
       const handler = async () => ({ result: 'test' });
       registerExternalHandler('requestAccess' as any, handler);
       unregisterExternalHandler('requestAccess' as any);
-      
+
       expect(hasExternalHandler('requestAccess' as any)).toBe(false);
     });
 
@@ -56,7 +56,7 @@ describe('external handler registry', () => {
     it('returns registered handler', () => {
       const handler = async () => ({ result: 'test' });
       registerExternalHandler('requestAccess' as any, handler);
-      
+
       const result = getExternalHandler('requestAccess' as any);
       expect(result).toBe(handler);
     });
@@ -71,7 +71,7 @@ describe('external handler registry', () => {
     it('returns true for registered handler', () => {
       const handler = async () => ({ result: 'test' });
       registerExternalHandler('requestAccess' as any, handler);
-      
+
       expect(hasExternalHandler('requestAccess' as any)).toBe(true);
     });
 
@@ -84,7 +84,7 @@ describe('external handler registry', () => {
     it('returns array of registered method names', () => {
       registerExternalHandler('requestAccess' as any, async () => ({}));
       registerExternalHandler('getAddress' as any, async () => ({}));
-      
+
       const result = getRegisteredMethods();
       expect(result).toEqual(['requestAccess', 'getAddress']);
     });
@@ -101,14 +101,14 @@ describe('external handler registry', () => {
         origin: ctx.origin,
       });
       registerExternalHandler('requestAccess' as any, handler);
-      
+
       const ctx: ExternalHandlerContext = {
         origin: 'https://example.com',
         params: {},
         requestId: '123',
         sender: {},
       };
-      
+
       const result = await dispatchExternalRequest('requestAccess' as any, ctx);
       expect(result).toEqual({ origin: 'https://example.com' });
     });
@@ -120,10 +120,10 @@ describe('external handler registry', () => {
         requestId: '123',
         sender: {},
       };
-      
-      await expect(
-        dispatchExternalRequest('unknownMethod' as any, ctx)
-      ).rejects.toThrow('Unknown external API method: unknownMethod');
+
+      await expect(dispatchExternalRequest('unknownMethod' as any, ctx)).rejects.toThrow(
+        'Unknown external API method: unknownMethod'
+      );
     });
 
     it('propagates handler errors', async () => {
@@ -131,17 +131,17 @@ describe('external handler registry', () => {
         throw new Error('Handler error');
       };
       registerExternalHandler('requestAccess' as any, handler);
-      
+
       const ctx: ExternalHandlerContext = {
         origin: 'https://example.com',
         params: {},
         requestId: '123',
         sender: {},
       };
-      
-      await expect(
-        dispatchExternalRequest('requestAccess' as any, ctx)
-      ).rejects.toThrow('Handler error');
+
+      await expect(dispatchExternalRequest('requestAccess' as any, ctx)).rejects.toThrow(
+        'Handler error'
+      );
     });
   });
 
@@ -149,9 +149,9 @@ describe('external handler registry', () => {
     it('clears all registered handlers', () => {
       registerExternalHandler('requestAccess' as any, async () => ({}));
       registerExternalHandler('getAddress' as any, async () => ({}));
-      
+
       clearExternalHandlers();
-      
+
       expect(getRegisteredMethods()).toEqual([]);
     });
   });

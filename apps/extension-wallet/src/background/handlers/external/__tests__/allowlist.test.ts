@@ -75,10 +75,10 @@ describe('allowlist service', () => {
     it('allows multiple entries for different origins', async () => {
       await addToAllowlist('testnet', 'CAAAA...', 'https://example.com');
       await addToAllowlist('testnet', 'CAAAA...', 'https://other.com');
-      
+
       const result1 = await isAllowed('testnet', 'CAAAA...', 'https://example.com');
       const result2 = await isAllowed('testnet', 'CAAAA...', 'https://other.com');
-      
+
       expect(result1).toBe(true);
       expect(result2).toBe(true);
     });
@@ -88,7 +88,7 @@ describe('allowlist service', () => {
     it('removes an existing entry', async () => {
       await addToAllowlist('testnet', 'CAAAA...', 'https://example.com');
       await removeFromAllowlist('testnet', 'CAAAA...', 'https://example.com');
-      
+
       const result = await isAllowed('testnet', 'CAAAA...', 'https://example.com');
       expect(result).toBe(false);
     });
@@ -110,7 +110,7 @@ describe('allowlist service', () => {
       await addToAllowlist('testnet', 'CAAAA...', 'https://example.com');
       await addToAllowlist('testnet', 'CAAAA...', 'https://other.com');
       await addToAllowlist('mainnet', 'CAAAA...', 'https://example.com');
-      
+
       const result = await getAllowedOrigins('testnet', 'CAAAA...');
       expect(result).toEqual(['https://example.com', 'https://other.com']);
     });
@@ -118,7 +118,7 @@ describe('allowlist service', () => {
     it('filters by smart account', async () => {
       await addToAllowlist('testnet', 'CAAAA...', 'https://example.com');
       await addToAllowlist('testnet', 'CBBBB...', 'https://other.com');
-      
+
       const result = await getAllowedOrigins('testnet', 'CAAAA...');
       expect(result).toEqual(['https://example.com']);
     });
@@ -128,7 +128,7 @@ describe('allowlist service', () => {
     it('clears all entries', async () => {
       await addToAllowlist('testnet', 'CAAAA...', 'https://example.com');
       await clearAllowlist();
-      
+
       const result = await isAllowed('testnet', 'CAAAA...', 'https://example.com');
       expect(result).toBe(false);
     });

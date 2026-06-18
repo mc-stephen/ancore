@@ -78,63 +78,69 @@ registerAllExternalHandlers();
  * Handle EXTERNAL_API_REQUEST messages from content script.
  * These are requests from dApps to interact with the wallet.
  */
-chrome.runtime.onMessage.addListener((message: unknown, sender: { url?: string; origin?: string; tab?: { id?: number } }, sendResponse: (response: unknown) => void) => {
-  const request = message as ExternalApiRequest;
-  
-  if (request.type !== 'EXTERNAL_API_REQUEST') {
-    return false;
-  }
+chrome.runtime.onMessage.addListener(
+  (
+    message: unknown,
+    sender: { url?: string; origin?: string; tab?: { id?: number } },
+    sendResponse: (response: unknown) => void
+  ) => {
+    const request = message as ExternalApiRequest;
 
-  const { method, requestId, params, origin } = request;
+    if (request.type !== 'EXTERNAL_API_REQUEST') {
+      return false;
+    }
 
-  // Validate origin
-  if (!origin || typeof origin !== 'string') {
-    sendResponse({
-      type: 'EXTERNAL_API_RESPONSE',
-      requestId,
-      ok: false,
-      error: 'Invalid origin',
-    });
-    return true;
-  }
+    const { method, requestId, params, origin } = request;
 
-  // Validate sender origin matches
-  if (sender.origin && sender.origin !== origin) {
-    sendResponse({
-      type: 'EXTERNAL_API_RESPONSE',
-      requestId,
-      ok: false,
-      error: 'Origin mismatch',
-    });
-    return true;
-  }
-
-  // Dispatch to handler
-  void dispatchExternalRequest(method as ExternalApiMethodName, {
-    origin,
-    params,
-    requestId,
-    sender,
-  })
-    .then((result) => {
-      sendResponse({
-        type: 'EXTERNAL_API_RESPONSE',
-        requestId,
-        ok: true,
-        result,
-      });
-    })
-    .catch((error: Error) => {
+    // Validate origin
+    if (!origin || typeof origin !== 'string') {
       sendResponse({
         type: 'EXTERNAL_API_RESPONSE',
         requestId,
         ok: false,
-        error: error.message,
+        error: 'Invalid origin',
       });
-    });
+      return true;
+    }
 
-  return true; // Async response
-});
+    // Validate sender origin matches
+    if (sender.origin && sender.origin !== origin) {
+      sendResponse({
+        type: 'EXTERNAL_API_RESPONSE',
+        requestId,
+        ok: false,
+        error: 'Origin mismatch',
+      });
+      return true;
+    }
+
+    // Dispatch to handler
+    void dispatchExternalRequest(method as ExternalApiMethodName, {
+      origin,
+      params,
+      requestId,
+      sender,
+    })
+      .then((result) => {
+        sendResponse({
+          type: 'EXTERNAL_API_RESPONSE',
+          requestId,
+          ok: true,
+          result,
+        });
+      })
+      .catch((error: Error) => {
+        sendResponse({
+          type: 'EXTERNAL_API_RESPONSE',
+          requestId,
+          ok: false,
+          error: error.message,
+        });
+      });
+
+    return true; // Async response
+  }
+);
 
 // Register internal handlers and activate dispatcher
 registerInternalHandlers();

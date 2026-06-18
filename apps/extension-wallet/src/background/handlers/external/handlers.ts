@@ -28,7 +28,8 @@ export async function handleRequestAccess(
   // For MVP, we'll use a default network and mock smart account ID
   // In production, these would come from the wallet state
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check if already allowed
   const allowed = await isAllowed(network, smartAccountId, origin);
@@ -49,14 +50,13 @@ export async function handleRequestAccess(
  * getAddress handler
  * Requires allowlist; returns contract id + deployment status
  */
-export async function handleGetAddress(
-  ctx: ExternalHandlerContext
-): Promise<GetAddressResult> {
+export async function handleGetAddress(ctx: ExternalHandlerContext): Promise<GetAddressResult> {
   const { origin, params } = ctx;
   const typedParams = params as { network?: string; smartAccountId?: string };
 
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check allowlist
   const allowed = await isAllowed(network, smartAccountId, origin);
@@ -82,7 +82,8 @@ export async function handleGetSmartAccount(
   const typedParams = params as { network?: string; smartAccountId?: string };
 
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check allowlist
   const allowed = await isAllowed(network, smartAccountId, origin);
@@ -111,7 +112,8 @@ export async function handleSignTransaction(
   const typedParams = params as { xdr?: string; network?: string; smartAccountId?: string };
 
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check allowlist
   const allowed = await isAllowed(network, smartAccountId, origin);
@@ -145,7 +147,8 @@ export async function handleSignAuthEntry(
   const typedParams = params as { authEntry?: string; network?: string; smartAccountId?: string };
 
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check allowlist
   const allowed = await isAllowed(network, smartAccountId, origin);
@@ -173,7 +176,8 @@ export async function handleSignMessage(
   const typedParams = params as { message?: string; network?: string; smartAccountId?: string };
 
   const network = typedParams.network || 'testnet';
-  const smartAccountId = typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const smartAccountId =
+    typedParams.smartAccountId || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
   // Check allowlist
   const allowed = await isAllowed(network, smartAccountId, origin);

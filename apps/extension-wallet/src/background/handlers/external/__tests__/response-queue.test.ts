@@ -24,7 +24,7 @@ describe('response queue', () => {
     describe('enqueueApproval', () => {
       it('enqueues a request for approval', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test' });
-        
+
         const approval = getApproval('123');
         expect(approval).toEqual({
           requestId: '123',
@@ -38,7 +38,7 @@ describe('response queue', () => {
       it('replaces existing approval with same requestId', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test1' });
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test2' });
-        
+
         const approval = getApproval('123');
         expect(approval?.params).toEqual({ xdr: 'test2' });
       });
@@ -47,7 +47,7 @@ describe('response queue', () => {
     describe('getApproval', () => {
       it('returns approval for existing requestId', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test' });
-        
+
         const approval = getApproval('123');
         expect(approval).toBeDefined();
       });
@@ -62,7 +62,7 @@ describe('response queue', () => {
       it('removes an approval', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test' });
         removeApproval('123');
-        
+
         const approval = getApproval('123');
         expect(approval).toBeUndefined();
       });
@@ -76,7 +76,7 @@ describe('response queue', () => {
       it('returns all pending approvals', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test1' });
         enqueueApproval('456', 'https://other.com', 'signTransaction', { xdr: 'test2' });
-        
+
         const approvals = getAllApprovals();
         expect(approvals).toHaveLength(2);
       });
@@ -91,7 +91,7 @@ describe('response queue', () => {
       it('clears all approvals', () => {
         enqueueApproval('123', 'https://example.com', 'signTransaction', { xdr: 'test' });
         clearApprovals();
-        
+
         const approvals = getAllApprovals();
         expect(approvals).toEqual([]);
       });
@@ -103,7 +103,7 @@ describe('response queue', () => {
       it('registers resolve and reject callbacks', async () => {
         let resolved = false;
         let rejected = false;
-        
+
         registerResponseCallbacks(
           '123',
           () => {
@@ -113,9 +113,9 @@ describe('response queue', () => {
             rejected = true;
           }
         );
-        
+
         resolveRequest('123', { result: 'test' });
-        
+
         expect(resolved).toBe(true);
         expect(rejected).toBe(false);
       });
@@ -123,12 +123,24 @@ describe('response queue', () => {
       it('replaces existing callbacks for same requestId', async () => {
         let resolved1 = false;
         let resolved2 = false;
-        
-        registerResponseCallbacks('123', () => { resolved1 = true; }, () => {});
-        registerResponseCallbacks('123', () => { resolved2 = true; }, () => {});
-        
+
+        registerResponseCallbacks(
+          '123',
+          () => {
+            resolved1 = true;
+          },
+          () => {}
+        );
+        registerResponseCallbacks(
+          '123',
+          () => {
+            resolved2 = true;
+          },
+          () => {}
+        );
+
         resolveRequest('123', { result: 'test' });
-        
+
         expect(resolved1).toBe(false);
         expect(resolved2).toBe(true);
       });
@@ -137,7 +149,7 @@ describe('response queue', () => {
     describe('resolveRequest', () => {
       it('resolves a request with result', async () => {
         let result: unknown;
-        
+
         registerResponseCallbacks(
           '123',
           (value) => {
@@ -145,16 +157,20 @@ describe('response queue', () => {
           },
           () => {}
         );
-        
+
         resolveRequest('123', { result: 'test' });
-        
+
         expect(result).toEqual({ result: 'test' });
       });
 
       it('removes callbacks after resolving', async () => {
-        registerResponseCallbacks('123', () => {}, () => {});
+        registerResponseCallbacks(
+          '123',
+          () => {},
+          () => {}
+        );
         resolveRequest('123', { result: 'test' });
-        
+
         // Should not throw when resolving again
         resolveRequest('123', { result: 'test2' });
       });
@@ -167,7 +183,7 @@ describe('response queue', () => {
     describe('rejectRequest', () => {
       it('rejects a request with error', async () => {
         let error: Error | null = null;
-        
+
         registerResponseCallbacks(
           '123',
           () => {},
@@ -175,17 +191,21 @@ describe('response queue', () => {
             error = err;
           }
         );
-        
+
         rejectRequest('123', new Error('Test error'));
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(error?.message).toBe('Test error');
       });
 
       it('removes callbacks after rejecting', async () => {
-        registerResponseCallbacks('123', () => {}, () => {});
+        registerResponseCallbacks(
+          '123',
+          () => {},
+          () => {}
+        );
         rejectRequest('123', new Error('Test error'));
-        
+
         // Should not throw when rejecting again
         rejectRequest('123', new Error('Test error 2'));
       });
@@ -197,11 +217,19 @@ describe('response queue', () => {
 
     describe('clearResponseCallbacks', () => {
       it('clears all response callbacks', () => {
-        registerResponseCallbacks('123', () => {}, () => {});
-        registerResponseCallbacks('456', () => {}, () => {});
-        
+        registerResponseCallbacks(
+          '123',
+          () => {},
+          () => {}
+        );
+        registerResponseCallbacks(
+          '456',
+          () => {},
+          () => {}
+        );
+
         clearResponseCallbacks();
-        
+
         // Should not throw when resolving after clear
         resolveRequest('123', { result: 'test' });
         resolveRequest('456', { result: 'test' });

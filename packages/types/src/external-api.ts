@@ -57,9 +57,7 @@ export interface ExternalHandlerContext {
 /**
  * Handler function for external API methods.
  */
-export type ExternalHandler = (
-  ctx: ExternalHandlerContext
-) => Promise<unknown>;
+export type ExternalHandler = (ctx: ExternalHandlerContext) => Promise<unknown>;
 
 /**
  * Allowlist entry keyed by (network, smartAccountId, origin).

@@ -142,7 +142,7 @@ export async function getAllowedOrigins(
 ): Promise<string[]> {
   const allowlist = await loadAllowlist();
   const origins: string[] = [];
-  for (const [key, entry] of allowlist.entries()) {
+  for (const [_key, entry] of allowlist.entries()) {
     if (entry.network === network && entry.smartAccountId === smartAccountId) {
       origins.push(entry.origin);
     }

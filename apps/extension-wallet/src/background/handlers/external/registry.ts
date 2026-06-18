@@ -5,11 +5,7 @@
  * Maps ExternalApiMethodName to handler functions.
  */
 
-import type {
-  ExternalApiMethodName,
-  ExternalHandler,
-  ExternalHandlerContext,
-} from '@ancore/types';
+import type { ExternalApiMethodName, ExternalHandler, ExternalHandlerContext } from '@ancore/types';
 
 const handlers = new Map<ExternalApiMethodName, ExternalHandler>();
 
@@ -33,9 +29,7 @@ export function unregisterExternalHandler(method: ExternalApiMethodName): void {
 /**
  * Get a handler for an external API method.
  */
-export function getExternalHandler(
-  method: ExternalApiMethodName
-): ExternalHandler | undefined {
+export function getExternalHandler(method: ExternalApiMethodName): ExternalHandler | undefined {
   return handlers.get(method);
 }
 
