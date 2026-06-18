@@ -226,12 +226,7 @@ export function OnboardingFlow() {
   }, [step, deployStatus, isLoading, handleDeploy]);
 
   if (step === 'welcome') {
-    return (
-      <WelcomeScreen
-        onNext={handleStartCreate}
-        onBack={undefined}
-      />
-    );
+    return <WelcomeScreen onNext={handleStartCreate} onBack={undefined} />;
   }
 
   // Import path — shown before password step when flowMode is 'import'
@@ -239,18 +234,17 @@ export function OnboardingFlow() {
     return (
       <WalletImportScreen
         onSubmit={handleImportSubmit}
-        onBack={() => { setFlowMode('create'); goToStep('welcome'); }}
+        onBack={() => {
+          setFlowMode('create');
+          goToStep('welcome');
+        }}
       />
     );
   }
 
   if (step === 'generate' && mnemonic) {
     return (
-      <MnemonicScreen
-        mnemonic={mnemonic}
-        onNext={handleMnemonicNext}
-        onBack={goToPreviousStep}
-      />
+      <MnemonicScreen mnemonic={mnemonic} onNext={handleMnemonicNext} onBack={goToPreviousStep} />
     );
   }
 
